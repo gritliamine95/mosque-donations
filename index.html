@@ -1,0 +1,48 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>جمع التبرعات</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="bg-mosque1">
+  <header class="topbar">
+    <div class="title">متابعة التبرعات</div>
+    <nav class="nav">
+      <a class="btn" href="add.html">➕ إضافة تبرع</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <!-- Colonne principale (gauche) -->
+    <section class="hero">
+      <p class="hero-text">
+        المبلغ الإجمالي حتى الآن:
+        <span id="totalAmount" class="number">0,00 €</span>
+      </p>
+    </section>
+
+    <!-- Panneau (droite) -->
+    <aside class="sidebar card">
+      <!-- Encadré des 2 plus grands dons -->
+      <div class="top-donations">
+        <h3 class="top-title">🏆 أكبر التبرعات</h3>
+        <ul id="topTwoList" class="top-list"></ul>
+      </div>
+
+      <!-- Séparateur visuel -->
+      <hr class="sep" />
+
+      <!-- 10 derniers dons (compteur: 1 = أقدم, العدد الأكبر = أحدث) -->
+      <h2 class="sidebar-title">آخر ١٠ تبرعات</h2>
+      <ul id="lastTenList" class="list"></ul>
+    </aside>
+  </main>
+
+ 
+
+  <script src="app.js"></script>
+</body>
+</html>

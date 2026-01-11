@@ -1,0 +1,219 @@
+
+/* ================== Fond mosquée plein écran ================== */
+html, body { height: 100%; }
+body.bg-mosque {
+  background: url('codemos/mosque.jpg') center center / cover no-repeat;
+  min-height: 100vh; /* occupe 100% de l'écran */
+  margin: 0;
+  color: #113;
+  font-family: "Tahoma", "Noto Naskh Arabic", "Noto Kufi Arabic", system-ui, Arial, sans-serif;
+}
+
+body.bg-mosque1 {
+    background: url('codemos/mosque1.jpg') center center / cover no-repeat;
+    min-height: 100vh; /* occupe 100% de l'écran */
+    margin: 0;
+    color: #113;
+    font-family: "Tahoma", "Noto Naskh Arabic", "Noto Kufi Arabic", system-ui, Arial, sans-serif;
+  }
+
+/* ================== Barres & containers ================== */
+* { box-sizing: border-box; }
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+}
+.title {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: #0b4; /* vert */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+.nav .btn { margin-inline-start: 8px; }
+
+.container {
+  max-width: 900px;
+  padding: 16px 20px 40px;
+  margin-inline: auto;
+}
+
+/* ================== Mise en page avec panneau à DROITE ================== */
+/* On force la direction LTR pour que la 2e colonne soit à DROITE,
+   tout en gardant le texte interne en RTL. */
+.layout {
+  direction: ltr;
+  display: grid;
+  grid-template-columns: 1fr 380px; /* contenu (gauche) + panneau (droite) */
+  gap: 16px;
+  padding: 12px 20px 40px;
+}
+@media (max-width: 960px) {
+  .layout { grid-template-columns: 1fr; }
+}
+.hero { direction: rtl; }    /* Texte arabe interne */
+.sidebar { direction: rtl; } /* Texte arabe interne */
+.sidebar {
+  height: fit-content;
+  position: sticky;
+  top: 12px;
+}
+
+/* ================== Cartes & boutons ================== */
+.card {
+  background: rgba(255, 255, 255, 0.86); /* léger fond pour lisibilité */
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.btn {
+  display: inline-block;
+  background: #136f63;
+  color: #fff;
+  text-decoration: none;
+  padding: 9px 14px;
+  border-radius: 10px;
+  transition: transform 0.05s ease, opacity 0.2s ease;
+}
+.btn:hover { transform: translateY(-1px); opacity: 0.95; }
+.btn-secondary { background: #b0bec5; color: #073b4c; }
+
+/* ================== Texte principal (total en vert) ================== */
+.hero-text {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  color: #00a652; /* vert */
+  font-weight: 800;
+  font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+  line-height: 1.4;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.45);
+}
+.hero-text .number { color: #00c853; }
+
+/* ================== Panneau : TOP 2 + derniers dons ================== */
+.top-donations {
+  background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 60%);
+  border: 1px solid #c8e6c9;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.top-title {
+  margin: 0 0 8px;
+  color: #03543f;
+  font-size: 1rem;
+  font-weight: 800;
+}
+.top-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.top-list li {
+  display: grid;
+  grid-template-columns: 1fr auto; /* texte + montant */
+  gap: 10px;
+  padding: 8px 4px;
+}
+.top-list .who {
+  color: #0b5137;
+  font-weight: 700;
+}
+.top-list .when {
+  color: #2f4858;
+  font-size: 0.9rem;
+}
+.top-list .amt {
+  font-weight: 900;
+  color: #047857;
+  white-space: nowrap;
+}
+
+.sep {
+  border: none;
+  border-top: 1px dashed #cfd8dc;
+  margin: 10px 0 12px;
+}
+
+.sidebar-title {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+  color: #065f46;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.list li {
+  display: grid;
+  /* En RTL: visuellement [badge] [texte date/heure(+nom)] [montant à l’extrémité] */
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 6px;
+  border-bottom: 1px solid #e7e7e7;
+}
+.list li:last-child { border-bottom: none; }
+
+.badge {
+  background: #065f46;
+  color: #fff;
+  font-weight: 800;
+  border-radius: 999px;
+  min-width: 32px;
+  text-align: center;
+  padding: 4px 8px;
+}
+
+.datetime {
+  color: #333;
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.amount {
+  font-weight: 800;
+  color: #046c4e;
+  white-space: nowrap;
+}
+
+/* ================== Formulaires ================== */
+.form .field { margin-bottom: 12px; }
+.form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.form input[type="text"],
+.form input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+.form .req { color: #c62828; }
+.actions { display: flex; gap: 10px; }
+
+.success {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #c8e6c9;
+}
+
+/* ================== Pied ================== */
+.footer {
+  text-align: center;
+  padding: 16px;
+  color: #073b4c;
+}
