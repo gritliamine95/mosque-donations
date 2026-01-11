@@ -28,7 +28,8 @@ body.bg-mosque1 {
 }
 .title {
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 1.8rem;
+  margin-right: 6rem;
   color: #0b4; /* vert */
   text-shadow: 0 1px 2px rgba(0,0,0,0.35);
 }
@@ -85,15 +86,15 @@ body.bg-mosque1 {
 .hero-text {
   margin: 16px 0 0;
   padding: 12px 16px;
-  color: #00a652; /* vert */
+  color: #f9f907; /* vert */
   font-weight: 800;
   font-size: clamp(1.4rem, 3.5vw, 2.4rem);
-  line-height: 1.4;
-  background: rgba(255,255,255,0.04);
+  line-height: 9.4;
+  background: rgba(202, 202, 8, 0.04);
   border-radius: 12px;
   text-shadow: 0 2px 4px rgba(0,0,0,0.45);
 }
-.hero-text .number { color: #00c853; }
+.hero-text .number { color: #ee7219; }
 
 /* ================== Panneau : TOP 2 + derniers dons ================== */
 .top-donations {
@@ -151,38 +152,59 @@ body.bg-mosque1 {
   margin: 0;
   padding: 0;
 }
+
 .list li {
-  display: grid;
-  /* En RTL: visuellement [badge] [texte date/heure(+nom)] [montant à l’extrémité] */
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 6px;
-  border-bottom: 1px solid #e7e7e7;
-}
+    display: grid;
+    grid-template-columns: auto 1fr auto; /* [badge] [info] [amount] */
+    align-items: center;
+    gap: 10px;
+    padding: 10px 6px;
+    border-bottom: 1px solid #e7e7e7;
+  }
+  
 .list li:last-child { border-bottom: none; }
 
+.info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+
+.donor-name {
+    font-weight: 800;
+    color: #0b5137;           /* vert profond */
+    font-size: 1rem;
+    letter-spacing: 0.2px;
+  }
+  
 .badge {
-  background: #065f46;
-  color: #fff;
-  font-weight: 800;
-  border-radius: 999px;
-  min-width: 32px;
-  text-align: center;
-  padding: 4px 8px;
-}
+    background: #065f46;
+    color: #fff;
+    font-weight: 800;
+    border-radius: 999px;
+    min-width: 32px;
+    text-align: center;
+    padding: 4px 8px;
+  }
+  
 
+
+/* Date/heure : plus discret */
 .datetime {
-  color: #333;
-  font-size: 0.92rem;
-  line-height: 1.2;
-}
+    color: #2f4858;
+    font-size: 0.8rem;
+    line-height: 1.2;
+  }
+  
 
-.amount {
-  font-weight: 800;
-  color: #046c4e;
-  white-space: nowrap;
-}
+
+  .amount {
+    font-weight: 800;
+    color: #046c4e;
+    white-space: nowrap;
+  }
+  
 
 /* ================== Formulaires ================== */
 .form .field { margin-bottom: 12px; }

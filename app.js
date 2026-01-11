@@ -85,38 +85,53 @@ function renderIndex() {
     return;
   }
 
-  // On prend les 10 derniers par date (les plus récents à la fin)
-  const lastTenChronoAsc = receipts.slice(-10); // déjà du plus ancien au plus récent
-  lastTenChronoAsc.forEach((r, idx) => {
-    const li = document.createElement('li');
+ 
 
-    // Compteur 1..N (1 = plus ancien)
-    const badge = document.createElement('div');
-    badge.className = 'badge';
-    badge.textContent = String(idx + 1);
 
-    // Date + Heure + Nom (si présent)
-    const dt = r.date ? new Date(r.date) : new Date();
-    const dateStr = fmtDateAr.format(dt);
-    const timeStr = fmtTimeAr.format(dt);
-    const donor = (r.name && r.name.trim()) ? ` • المتبرّع: ${r.name.trim()}` : '';
+// On prend les 10 derniers par date (affichés du plus récent en haut)
+const lastTenChronoAsc = receipts.slice(-10); // ancien -> récent
+const totalCount = receipts.length;           // compteur absolu
 
-    const dtBox = document.createElement('div');
-    dtBox.className = 'datetime';
-    dtBox.textContent = `الوقت: ${timeStr} • التاريخ: ${dateStr}${donor}`;
+lastTenChronoAsc.reverse().forEach((r, idx) => {
+  const li = document.createElement('li');
 
-    // Montant
-    const amt = document.createElement('div');
-    amt.className = 'amount';
-    amt.textContent = fmtCurrency.format(Number(r.amount) || 0);
+  // Compteur ABSOLU : top = totalCount, puis totalCount-1, ... (ex: 19,18,...,10)
+  const badge = document.createElement('div');
+  badge.className = 'badge';
+  badge.textContent = String(totalCount - idx);
 
-    // Ordre (en RTL): [compteur] [texte] [montant]
-    li.appendChild(badge);
-    li.appendChild(dtBox);
-    li.appendChild(amt);
+  // Donateur (en gras, style moderne)
+  const donorName = (r.name && r.name.trim()) ? r.name.trim() : 'متبرّع';
+  const nameEl = document.createElement('div');
+  nameEl.className = 'donor-name';
+  nameEl.textContent = donorName;
 
-    listEl.appendChild(li);
-  });
+  // Date + Heure (en dessous du nom)
+  const dt = r.date ? new Date(r.date) : new Date();
+  const dateStr = fmtDateAr.format(dt);
+  const timeStr = fmtTimeAr.format(dt);
+  const dtEl = document.createElement('div');
+  dtEl.className = 'datetime';
+  dtEl.textContent = `الوقت: ${timeStr} • التاريخ: ${dateStr}`;
+
+  // Bloc info (nom au-dessus, datetime en dessous)
+  const infoBox = document.createElement('div');
+  infoBox.className = 'info';
+  infoBox.appendChild(nameEl);
+  infoBox.appendChild(dtEl);
+
+  // Montant (à l’extrémité)
+  const amt = document.createElement('div');
+  amt.className = 'amount';
+  amt.textContent = fmtCurrency.format(Number(r.amount) || 0);
+
+  // Ordre (en RTL): [compteur] [info (nom + date/heure)] [montant]
+  li.appendChild(badge);
+  li.appendChild(infoBox);
+  li.appendChild(amt);
+
+  listEl.appendChild(li);
+});
 }
 
 /* ================== Rendu Page d'ajout ================== */
