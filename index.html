@@ -19,7 +19,7 @@
     <!-- Colonne principale (gauche) -->
     <section class="hero">
       <p class="hero-text">
-        <span id="totalAmount" class="number">0,00 €</span>
+        <span id="totalAmount" class="number"></span>
       </p>
     </section>
 
@@ -41,16 +41,15 @@
     </aside>
   </main>
 
-  <script type="module">
-    // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
-    // TODO: Add SDKs for Firebase products that you want to use
-    // https://firebase.google.com/docs/web/setup#available-libraries
   
-    // Your web app's Firebase configuration
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-    const firebaseConfig = {
+<!-- 1) Initialisation Firebase (AVANT app.js) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // ⚠️ Remplace par ta vraie config du projet Firebase
+  const firebaseConfig = {
       apiKey: "AIzaSyBykFFJT2cF7_pVu4aPSQqy_ucu9GdnJt8",
       authDomain: "mosque-receipts.firebaseapp.com",
       projectId: "mosque-receipts",
@@ -59,11 +58,36 @@
       appId: "1:573456225416:web:8e266a8802e4baaf94bb3d",
       measurementId: "G-SPZR44XBHD"
     };
-  
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
-  </script>
+
+  // Expose Firebase pour app.js
+  window._fb = {};
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // Promise résolue dès que l’auth anonyme est prête
+  window._fb.db = db;
+  window._fb.authReady = new Promise((resolve, reject) => {
+    signInAnonymously(auth).catch((e) => {
+      console.error('[Auth] signInAnonymously error:', e);
+      reject(e);
+    });
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log('[Auth] Anonymous signed in:', user.uid);
+        resolve(user);
+      }
+    }, (e) => {
+      console.error('[Auth] onAuthStateChanged error:', e);
+      reject(e);
+    });
+  });
+
+  console.log('[Firebase] initialized');
+</script>
+
+
+
 
   <script src="app.js"></script>
 </body>

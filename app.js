@@ -1,23 +1,4 @@
 
-/* ================== Stockage ================== */
-const STORAGE_KEY = 'mosque_simple_receipts';
-
-function getReceipts() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-function saveReceipts(list) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
-function addReceipt(entry) {
-  const list = getReceipts();
-  list.push(entry);
-  saveReceipts(list);
-}
 
 
 /* ================== Formats & Constantes ================== */
@@ -43,9 +24,13 @@ function topNByAmount(receipts, n = 3) {
 
 /* ================== Firestore helpers ================== */
 // Retourne une promesse résolue quand _fb (auth + db) est prêt
+
 function fbReady() {
-  return window._fb?.authReady || Promise.reject(new Error('Firebase non initialisé'));
+  if (window._fb?.authReady) return window._fb.authReady;
+  return Promise.reject(new Error('Firebase non initialisé'));
 }
+``
+
 
 // Lecture des X derniers dons (les plus récents d’abord)
 async function fetchLastDonations(limitCount = 200) {
@@ -216,7 +201,28 @@ async function renderAdd() {
 }
 
 /* ================== Bootstrapping ================== */
-document.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('lastTenList')) renderIndex();
-  if (document.getElementById('donForm')) renderAdd();
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Si Firebase n'est pas injecté, affiche un message utile
+  if (!window._fb || !window._fb.authReady) {
+    console.error('Firebase non initialisé : vérifie le bloc <script type="module"> avant app.js sur cette page.');
+    const listEl = document.getElementById('lastTenList');
+    if (listEl) listEl.innerHTML = '<li class="datetime">تعذر الاتصال بقاعدة البيانات (تهيئة مفقودة).</li>';
+    return;
+  }
+
+  try {
+    // ⚠️ Attend l’auth anonyme avant d’appeler renderIndex / renderAdd
+    await window._fb.authReady;
+
+    if (document.getElementById('lastTenList')) {
+      await renderIndex();
+    }
+    if (document.getElementById('donForm')) {
+      await renderAdd();
+    }
+  } catch (e) {
+    console.error('Erreur d’initialisation Firebase:', e);
+  }
 });
+
