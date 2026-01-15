@@ -19,128 +19,178 @@ function addReceipt(entry) {
   saveReceipts(list);
 }
 
-/* ================== Formats ================== */
-const CURRENCY = 'EUR'; // 👉 change en 'TND' si besoin
-const fmtCurrency = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: CURRENCY });
+
+/* ================== Formats & Constantes ================== */
+const CURRENCY = 'EUR'; // ou 'TND'
+const TARGET = 27000;
+
+const fmtCurrency = new Intl.NumberFormat('fr-FR', { 
+  style: 'currency',
+  currency: CURRENCY,
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0
+});
 const fmtDateAr = new Intl.DateTimeFormat('ar', { dateStyle: 'medium' });
 const fmtTimeAr = new Intl.DateTimeFormat('ar', { timeStyle: 'short' });
 
-/* ================== Utilitaires ================== */
+/* ================== Utils ================== */
 function topNByAmount(receipts, n = 3) {
-  // Copie + tri décroissant par montant
   return receipts
     .slice()
     .sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0))
     .slice(0, n);
 }
 
+/* ================== Firestore helpers ================== */
+// Retourne une promesse résolue quand _fb (auth + db) est prêt
+function fbReady() {
+  return window._fb?.authReady || Promise.reject(new Error('Firebase non initialisé'));
+}
+
+// Lecture des X derniers dons (les plus récents d’abord)
+async function fetchLastDonations(limitCount = 200) {
+  await fbReady();
+  const { db } = window._fb;
+  const { collection, query, orderBy, limit, getDocs } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+  const q = query(collection(db, 'donations'), orderBy('createdAt', 'desc'), limit(limitCount));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+// Ajout d’un don
+async function addReceipt(entry) {
+  await fbReady();
+  const { db } = window._fb;
+  const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+  const clean = {
+    amount: Number(entry.amount) || 0,
+    name: (entry.name || '').trim(),
+    createdAt: serverTimestamp(),
+  };
+  await addDoc(collection(db, 'donations'), clean);
+}
+
 /* ================== Rendu Accueil ================== */
-function renderIndex() {
-  const receipts = getReceipts();
+async function renderIndex() {
+  await fbReady();
 
-  // Total
-  const total = receipts.reduce((s, r) => s + (Number(r.amount) || 0), 0);
   const totalEl = document.getElementById('totalAmount');
-  if (totalEl) totalEl.textContent = fmtCurrency.format(total);
-
-  // --- TOP 2 (plus grands dons) ---
   const topTwoEl = document.getElementById('topTwoList');
-  if (topTwoEl) {
-    topTwoEl.innerHTML = '';
-    const top2 = topNByAmount(receipts, 3);
-    if (top2.length === 0) {
-      topTwoEl.innerHTML = '<li class="when">لا توجد تبرعات بعد.</li>';
-    } else {
-      top2.forEach((r) => {
-        const li = document.createElement('li');
-
-        const whoWhen = document.createElement('div');
-        const dt = r.date ? new Date(r.date) : new Date();
-        const donor = (r.name && r.name.trim()) ? r.name.trim() : 'متبرّع';
-        const dateStr = fmtDateAr.format(dt);
-        const timeStr = fmtTimeAr.format(dt);
-        whoWhen.innerHTML = `
-          <div class="who">${donor}</div>
-          <div class="when">الوقت: ${timeStr} • التاريخ: ${dateStr}</div>
-        `;
-
-        const amt = document.createElement('div');
-        amt.className = 'amt';
-        amt.textContent = fmtCurrency.format(Number(r.amount) || 0);
-
-        li.appendChild(whoWhen);
-        li.appendChild(amt);
-        topTwoEl.appendChild(li);
-      });
-    }
-  }
-
-  // --- Derniers 10 dons (avec compteur: 1=أقدم ... N=أحدث) ---
   const listEl = document.getElementById('lastTenList');
   if (!listEl) return;
 
-  listEl.innerHTML = '';
-  if (receipts.length === 0) {
-    listEl.innerHTML = '<li class="datetime">لا توجد تبرعات بعد.</li>';
-    return;
-  }
+  const { db } = window._fb;
+  const { collection, query, orderBy, limit, onSnapshot } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
 
- 
+  // Écoute temps réel des 200 derniers dons (tri desc sur createdAt)
+  const q = query(collection(db, 'donations'), orderBy('createdAt', 'desc'), limit(200));
+  onSnapshot(q, (snap) => {
+    // Convertit snapshot -> array
+    const receipts = snap.docs.map(d => {
+      const data = d.data();
+      const dt = data.createdAt?.toDate ? data.createdAt.toDate() : (data.date ? new Date(data.date) : new Date());
+      return {
+        id: d.id,
+        amount: Number(data.amount) || 0,
+        name: data.name || '',
+        date: dt.toISOString(),
+      };
+    });
 
+    // Calcul du “reste”
+    const sum = receipts.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const remaining = Math.max(0, TARGET - sum);
+    if (totalEl) totalEl.textContent = fmtCurrency.format(remaining);
 
-// On prend les 10 derniers par date (affichés du plus récent en haut)
-const lastTenChronoAsc = receipts.slice(-10); // ancien -> récent
-const totalCount = receipts.length;           // compteur absolu
+    // TOP 3 par montant
+    if (topTwoEl) {
+      topTwoEl.innerHTML = '';
+      const top3 = topNByAmount(receipts, 3);
+      if (top3.length === 0) {
+        topTwoEl.innerHTML = '<li class="when">لا توجد تبرعات بعد.</li>';
+      } else {
+        top3.forEach((r) => {
+          const li = document.createElement('li');
 
-lastTenChronoAsc.reverse().forEach((r, idx) => {
-  const li = document.createElement('li');
+          const whoWhen = document.createElement('div');
+          const dt = r.date ? new Date(r.date) : new Date();
+          const donor = (r.name && r.name.trim()) ? r.name.trim() : 'متبرّع';
+          const dateStr = fmtDateAr.format(dt);
+          const timeStr = fmtTimeAr.format(dt);
+          whoWhen.innerHTML = `
+            <div class="who">${donor}</div>
+            <div class="when">الوقت: ${timeStr} • التاريخ: ${dateStr}</div>
+          `;
 
-  // Compteur ABSOLU : top = totalCount, puis totalCount-1, ... (ex: 19,18,...,10)
-  const badge = document.createElement('div');
-  badge.className = 'badge';
-  badge.textContent = String(totalCount - idx);
+          const amt = document.createElement('div');
+          amt.className = 'amt';
+          amt.textContent = fmtCurrency.format(Number(r.amount) || 0);
 
-  // Donateur (en gras, style moderne)
-  const donorName = (r.name && r.name.trim()) ? r.name.trim() : 'متبرّع';
-  const nameEl = document.createElement('div');
-  nameEl.className = 'donor-name';
-  nameEl.textContent = donorName;
+          li.appendChild(whoWhen);
+          li.appendChild(amt);
+          topTwoEl.appendChild(li);
+        });
+      }
+    }
 
-  // Date + Heure (en dessous du nom)
-  const dt = r.date ? new Date(r.date) : new Date();
-  const dateStr = fmtDateAr.format(dt);
-  const timeStr = fmtTimeAr.format(dt);
-  const dtEl = document.createElement('div');
-  dtEl.className = 'datetime';
-  dtEl.textContent = `الوقت: ${timeStr} • التاريخ: ${dateStr}`;
+    // Derniers 10 dons (affichés du plus récent au plus ancien)
+    listEl.innerHTML = '';
+    if (receipts.length === 0) {
+      listEl.innerHTML = '<li class="datetime">لا توجد تبرعات بعد.</li>';
+      return;
+    }
 
-  // Bloc info (nom au-dessus, datetime en dessous)
-  const infoBox = document.createElement('div');
-  infoBox.className = 'info';
-  infoBox.appendChild(nameEl);
-  infoBox.appendChild(dtEl);
+    // Les 10 derniers en ordre desc (déjà desc), mais compteur absolu = totalCount - idx
+    const totalCount = receipts.length;
+    receipts.slice(0, 10).forEach((r, idx) => {
+      const li = document.createElement('li');
 
-  // Montant (à l’extrémité)
-  const amt = document.createElement('div');
-  amt.className = 'amount';
-  amt.textContent = fmtCurrency.format(Number(r.amount) || 0);
+      const badge = document.createElement('div');
+      badge.className = 'badge';
+      badge.textContent = String(totalCount - idx);
 
-  // Ordre (en RTL): [compteur] [info (nom + date/heure)] [montant]
-  li.appendChild(badge);
-  li.appendChild(infoBox);
-  li.appendChild(amt);
+      const donorName = (r.name && r.name.trim()) ? r.name.trim() : 'متبرّع';
+      const nameEl = document.createElement('div');
+      nameEl.className = 'donor-name';
+      nameEl.textContent = donorName;
 
-  listEl.appendChild(li);
-});
+      const dt = r.date ? new Date(r.date) : new Date();
+      const dateStr = fmtDateAr.format(dt);
+      const timeStr = fmtTimeAr.format(dt);
+      const dtEl = document.createElement('div');
+      dtEl.className = 'datetime';
+      dtEl.textContent = `الوقت: ${timeStr} • التاريخ: ${dateStr}`;
+
+      const infoBox = document.createElement('div');
+      infoBox.className = 'info';
+      infoBox.appendChild(nameEl);
+      infoBox.appendChild(dtEl);
+
+      const amt = document.createElement('div');
+      amt.className = 'amount';
+      amt.textContent = fmtCurrency.format(Number(r.amount) || 0);
+
+      li.appendChild(badge);
+      li.appendChild(infoBox);
+      li.appendChild(amt);
+
+      listEl.appendChild(li);
+    });
+  }, (err) => {
+    console.error('Firestore listen error:', err);
+    listEl.innerHTML = '<li class="datetime">حدث خطأ في الاتصال بقاعدة البيانات.</li>';
+  });
 }
 
 /* ================== Rendu Page d'ajout ================== */
-function renderAdd() {
+async function renderAdd() {
+  await fbReady();
+
   const form = document.getElementById('donForm');
   const message = document.getElementById('saveMessage');
   if (!form) return;
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const amount = Number(document.getElementById('amount').value);
@@ -151,17 +201,16 @@ function renderAdd() {
       return;
     }
 
-    const entry = {
-      amount,
-      name,
-      date: new Date().toISOString(),
-    };
-    addReceipt(entry);
-
-    form.reset();
-    if (message) {
-      message.style.display = 'block';
-      setTimeout(() => (message.style.display = 'none'), 2000);
+    try {
+      await addReceipt({ amount, name });
+      form.reset();
+      if (message) {
+        message.style.display = 'block';
+        setTimeout(() => (message.style.display = 'none'), 2000);
+      }
+    } catch (err) {
+      console.error('Add donation error:', err);
+      alert('تعذر حفظ التبرع. حاول مرة أخرى.');
     }
   });
 }

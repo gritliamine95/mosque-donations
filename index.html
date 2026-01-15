@@ -19,7 +19,6 @@
     <!-- Colonne principale (gauche) -->
     <section class="hero">
       <p class="hero-text">
-        المبلغ الإجمالي حتى الآن:
         <span id="totalAmount" class="number">0,00 €</span>
       </p>
     </section>
@@ -42,7 +41,29 @@
     </aside>
   </main>
 
- 
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    const firebaseConfig = {
+      apiKey: "AIzaSyBykFFJT2cF7_pVu4aPSQqy_ucu9GdnJt8",
+      authDomain: "mosque-receipts.firebaseapp.com",
+      projectId: "mosque-receipts",
+      storageBucket: "mosque-receipts.firebasestorage.app",
+      messagingSenderId: "573456225416",
+      appId: "1:573456225416:web:8e266a8802e4baaf94bb3d",
+      measurementId: "G-SPZR44XBHD"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+  </script>
 
   <script src="app.js"></script>
 </body>
