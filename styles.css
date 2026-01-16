@@ -97,7 +97,7 @@ body.bg-mosque1 {
 }
 .hero-text {
   margin: -230px 0 0;
-  margin-right: 80px;
+  margin-right: 140px;
   padding: 12px 16px;
   color: #f9f907; /* vert */
   font-weight: 1000;
@@ -310,8 +310,9 @@ body.bg-mosque1 {
 
 .progress-section {
   margin: 16px 80px 0 0; /* aligne sous ton hero-text en RTL ; ajuste si besoin */
-  margin-top: 220px;
-  max-width: 680px;
+  margin-top: 170px;
+  margin-right: 130px;
+  max-width: 660px;
   color: #fff;
 }
 
