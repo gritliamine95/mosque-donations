@@ -9,15 +9,45 @@
 </head>
 <body class="bg-mosque1">
   <header class="topbar">
-    <div class="title">متابعة التبرعات</div>
+    
     <nav class="nav">
       <a class="btn" href="add.html">➕ إضافة تبرع</a>
     </nav>
+    <div class="nowtime-wrap" dir="rtl">
+      <span class="nowtime-icon" aria-hidden="true">🕒</span>
+      <span id="nowTime" class="nowtime-text" aria-live="polite">--:--</span>
+    </div>
   </header>
 
   <main class="layout">
+    
+ <!-- 👉 Nouveau : texte du montant payé -->
+  
+
+
+ 
     <!-- Colonne principale (gauche) -->
     <section class="hero">
+      <section class="progress-section" dir="rtl">
+        <div class="progress-header">
+          <span class="progress-title">التقدم نحو الهدف</span>
+          <span id="progressPercent" class="progress-percent">0%</span>
+        </div>
+      
+        <div class="progress-track" aria-label="Progression des dons" role="progressbar"
+             aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div id="progressBar" class="progress-fill">
+            <!-- Flèche verte en tête de barre -->
+            <span class="progress-arrow" aria-hidden="true">➤</span>
+          </div>
+        </div>
+      
+        <div class="progress-footer">
+          <span id="progressPaid" class="progress-paid">0,00 €</span>
+          <span class="progress-sep">/</span>
+          <span class="progress-target">270 000</span>
+        </div>
+      </section>    
       <p class="hero-text">
         <span id="totalAmount" class="number"></span>
       </p>
@@ -38,7 +68,12 @@
       <!-- 10 derniers dons (compteur: 1 = أقدم, العدد الأكبر = أحدث) -->
       <h2 class="sidebar-title">آخر ١٠ تبرعات</h2>
       <ul id="lastTenList" class="list"></ul>
+      
     </aside>
+   
+
+``
+
   </main>
 
   

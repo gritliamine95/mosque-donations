@@ -3,7 +3,8 @@
 
 /* ================== Formats & Constantes ================== */
 const CURRENCY = 'EUR'; // ou 'TND'
-const TARGET = 27000;
+const TARGET = 85000;
+
 
 const fmtCurrency = new Intl.NumberFormat('fr-FR', { 
   style: 'currency',
@@ -86,6 +87,46 @@ async function renderIndex() {
     const sum = receipts.reduce((s, r) => s + (Number(r.amount) || 0), 0);
     const remaining = Math.max(0, TARGET - sum);
     if (totalEl) totalEl.textContent = fmtCurrency.format(remaining);
+    
+
+    
+// ----- Déjà dans ton code -----
+// const sum = receipts.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+// const remaining = Math.max(0, TARGET - sum);
+// if (totalEl) totalEl.textContent = fmtCurrency.format(remaining);
+
+// ----- Mise à jour de la jauge -----
+const TargetTotal = 270000;
+const paid = Math.max(0, Math.min(TargetTotal, sum + 185000)); // borne entre 0 et TARGET
+const pct  = TARGET > 0 ? Math.round((paid / TargetTotal) * 100) : 0;
+
+// DOM refs
+const barEl   = document.getElementById('progressBar');
+const pctEl   = document.getElementById('progressPercent');
+const progressPaidEl   = document.getElementById('progressPaid');
+const trackEl = document.querySelector('.progress-track');
+
+// Applique la largeur (avec transition CSS)
+if (barEl) {
+  barEl.style.width = pct + '%';
+}
+
+// Met à jour les libellés
+if (pctEl)  pctEl.textContent  = `${pct}%`;
+if (progressPaidEl ) progressPaidEl .textContent = fmtCurrency.format(paid);
+
+// Accessibilité (ARIA)
+if (trackEl) {
+  trackEl.setAttribute('aria-valuenow', String(pct));
+}
+
+
+const paidEl = document.getElementById('paidText');
+if (paidEl) {
+  // Si ton objectif réel est 270000, assure-toi d’avoir TARGET = 270000
+  const paid = Math.max(0, TARGET - remaining + 185000); // équivaut à sum, borné à 0
+  paidEl.textContent = `${fmtCurrency.format(paid)}`;
+}
 
     // TOP 3 par montant
     if (topTwoEl) {
@@ -225,4 +266,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.error('Erreur d’initialisation Firebase:', e);
   }
 });
+
+
+
+  // === Réglages ===
+  // "ar" pour arabe (chiffres arabes, ordre de date), "fr-FR" pour français, etc.
+  const CLOCK_LOCALE = "ar";
+
+  // Afficher date + heure (true) ou seulement l'heure (false)
+  const SHOW_DATE = true;
+
+  // Formats
+  const fmtDate = new Intl.DateTimeFormat(CLOCK_LOCALE, { dateStyle: 'medium' });
+  const fmtTime = new Intl.DateTimeFormat(CLOCK_LOCALE, { timeStyle: 'medium' }); // "short" si tu préfères HH:MM
+
+  function updateNowElement() {
+    const el = document.getElementById('nowTime');
+    if (!el) return;
+    const now = new Date();
+    el.textContent = SHOW_DATE
+      ? `${fmtDate.format(now)} • ${fmtTime.format(now)}`
+      : fmtTime.format(now);
+  }
+
+  function startClock() {
+    // Evite de démarrer plusieurs fois (si scripts chargés en double)
+    if (window._clockStarted) return;
+    window._clockStarted = true;
+
+    // Mise à jour immédiate
+    updateNowElement();
+
+    // Aligne sur la prochaine seconde pour une cadence propre
+    const msToNextSecond = 1000 - (Date.now() % 1000);
+    setTimeout(() => {
+      updateNowElement();
+      setInterval(updateNowElement, 1000);
+    }, msToNextSecond);
+  }
+
+  // Lance dès que le DOM est prêt
+  document.addEventListener('DOMContentLoaded', startClock);
 
