@@ -44,17 +44,25 @@ async function fetchLastDonations(limitCount = 200) {
 }
 
 // Ajout d’un don
+
+// Ajout d’un don — retourne l’ID pour permettre d’annuler/supprimer ensuite
 async function addReceipt(entry) {
   await fbReady();
   const { db } = window._fb;
-  const { collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+  const { collection, addDoc, serverTimestamp } =
+    await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+
   const clean = {
     amount: Number(entry.amount) || 0,
-    name: (entry.name || '').trim(),
+    // nom par défaut si vide
+    name: (entry.name && entry.name.trim()) ? entry.name.trim() : 'فاعل خير',
     createdAt: serverTimestamp(),
   };
-  await addDoc(collection(db, 'donations'), clean);
+
+  const docRef = await addDoc(collection(db, 'donations'), clean);
+  return { id: docRef.id, ...clean };
 }
+
 
 /* ================== Rendu Accueil ================== */
 async function renderIndex() {

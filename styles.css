@@ -401,7 +401,7 @@ body.bg-mosque1 {
 /* Mode clair (facultatif) */
 @media (prefers-color-scheme: light) {
   .progress-percent,
-  .progress-paid { color: #0f7a3b; }
+  .progress-paid { color: #22ff00; }
   .progress-fill {
     background: linear-gradient(90deg, #15803d, #22c55e);
     box-shadow: 0 1px 8px rgba(21,128,61,0.35);
