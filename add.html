@@ -2,6 +2,18 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  
+<script>
+  (function () {
+    // Si la marque d’accès n’existe pas → retour vers l’accueil
+    if (sessionStorage.getItem("canAddDonation") !== "1") {
+      // Optionnel: message
+      alert("الوصول ممنوع: تحتاج كلمة المرور لإضافة تبرع.");
+      window.location.replace("index.html");
+    }
+  })();
+</script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>إضافة تبرع</title>
