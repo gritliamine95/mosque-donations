@@ -126,35 +126,8 @@
 
   <script src="app.js"></script>
   
-<script>
-  (function () {
-    // ⚠️ Définis ton mot de passe ici
-    const ADD_PASSWORD = "amin2026@";
 
-    const link = document.getElementById("addDonationLink");
-    if (!link) return;
-
-    link.addEventListener("click", function (e) {
-      e.preventDefault();
-
-      // Prompt simple (tu peux remplacer par une modale si tu veux)
-      const entered = window.prompt("أدخل كلمة المرور للوصول إلى إضافة تبرع:");
-      if (entered === null) {
-        // Annulé
-        return;
-      }
-
-      if (entered === ADD_PASSWORD) {
-        // Marque l’utilisateur comme autorisé pour add.html (valable pour cette session)
-        sessionStorage.setItem("canAddDonation", "1");
-        // Redirige vers la page d’ajout
-        window.location.href = link.getAttribute("href");
-      } else {
-        alert("❌ كلمة المرور غير صحيحة");
-      }
-    });
-  })();
-</script>
 
 </body>
 </html>
+
